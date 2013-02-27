@@ -12,6 +12,7 @@
 *.sqlite
 
 Debug/
+*.ppm
 *.sdf
 *.suo
 *.cproject
