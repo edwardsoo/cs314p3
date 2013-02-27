@@ -16,11 +16,11 @@
 using namespace std;
 
 bool 
-FileParser::parse(	const char *filename,		std::vector<PointLight> *lights, 
-					std::vector<Plane> *planes,	std::vector<Sphere> *spheres,
-					Camera *camera, int *resolution)
+	FileParser::parse(	const char *filename,		std::vector<PointLight> *lights, 
+	std::vector<Plane> *planes,	std::vector<Sphere> *spheres,
+	Camera *camera, int *resolution)
 {
-	
+
 	ifstream in;
 	in.open(filename, ios::in);
 	if(!in.is_open()) {
@@ -48,7 +48,7 @@ FileParser::parse(	const char *filename,		std::vector<PointLight> *lights,
 		if(line.substr(0,10).compare("PointLight") == 0) {
 
 			PointLight light;
-			
+
 			// read next line - position
 			in.getline(currentLine,256);
 			istringstream(currentLine) >> light.position[0] >> light.position[1] >> light.position[2];
@@ -56,19 +56,19 @@ FileParser::parse(	const char *filename,		std::vector<PointLight> *lights,
 			// read next line - ambient
 			in.getline(currentLine,256);
 			istringstream(currentLine) >> light.ambient[0] >> light.ambient[1] >> light.ambient[2];
-			
+
 			// read next line - diffuse
 			in.getline(currentLine,256);
 			istringstream(currentLine) >> light.diffuse[0] >> light.diffuse[1] >> light.diffuse[2];
-			
+
 			// read next line - specular
 			in.getline(currentLine,256);
 			istringstream(currentLine) >> light.specular[0] >> light.specular[1] >> light.specular[2];
-			
+
 			// read next line - emission
 			in.getline(currentLine,256);
 			istringstream(currentLine) >> light.attenuation[0] >> light.attenuation[1] >> light.attenuation[2];
-			
+
 			lights->push_back(light);
 		}
 
@@ -91,19 +91,49 @@ FileParser::parse(	const char *filename,		std::vector<PointLight> *lights,
 			Material material;
 
 			//////////*********** START OF CODE TO CHANGE *******////////////
+			// read material id
+			stringstream(line.substr(8)) >> material.id;
+
+			// read next line - ambient
+			in.getline(currentLine,256);
+			istringstream(currentLine) >> material.ambient[0] >> material.ambient[1] >> material.ambient[2];
+
+			// read next line - diffuse
+			in.getline(currentLine,256);
+			istringstream(currentLine) >> material.diffuse[0] >> material.diffuse[1] >> material.diffuse[2];
+
+			// read next line - specular
+			in.getline(currentLine,256);
+			istringstream(currentLine) >> material.specular[0] >> material.specular[1] >> material.specular[2];
+
+			// read next line - emission
+			in.getline(currentLine,256);
+			istringstream(currentLine) >> material.emission[0] >> material.emission[1] >> material.emission[2];
+
+			// read next line - shininess
+			in.getline(currentLine,256);
+			istringstream(currentLine) >> material.shininess;
+
+			// read next line - shadow
+			in.getline(currentLine,256);
+			istringstream(currentLine) >> material.shadow;
+
+			// read next line - reflect
+			in.getline(currentLine,256);
+			istringstream(currentLine) >> material.reflect;
 
 			//////////*********** END OF CODE TO CHANGE *******////////////
-		
+
 			materials.push_back(material);
 
-			//cout << "Material: " << material.id << endl;
-			//cout << material.ambient[0] << ", " << material.ambient[1] << ", " << material.ambient[2] << endl;
-			//cout << material.diffuse[0] << ", " << material.diffuse[1] << ", " << material.diffuse[2] << endl;
-			//cout << material.specular[0] << ", " << material.specular[1] << ", " << material.specular[2] << endl;
-			//cout << material.emission[0] << ", " << material.emission[1] << ", " << material.emission[2] << endl;
-			//cout << material.shininess << endl;
-			//cout << material.shadow << endl;
-			//cout << material.reflect << endl << endl;
+			cout << "Material: " << material.id << endl;
+			cout << material.ambient[0] << ", " << material.ambient[1] << ", " << material.ambient[2] << endl;
+			cout << material.diffuse[0] << ", " << material.diffuse[1] << ", " << material.diffuse[2] << endl;
+			cout << material.specular[0] << ", " << material.specular[1] << ", " << material.specular[2] << endl;
+			cout << material.emission[0] << ", " << material.emission[1] << ", " << material.emission[2] << endl;
+			cout << material.shininess << endl;
+			cout << material.shadow << endl;
+			cout << material.reflect << endl << endl;
 		}
 
 		/////////////////////////////////////////////////////////////////////////////////
@@ -121,12 +151,13 @@ FileParser::parse(	const char *filename,		std::vector<PointLight> *lights,
 			Sphere sphere;			
 
 			//////////*********** START OF CODE TO CHANGE *******////////////
+			istringstream(line.substr(6)) >> sphere.radius >> sphere.center[0] >> sphere.center[1] >> sphere.center[2] >> sphere.materialID;
 
 			//////////*********** END OF CODE TO CHANGE *******////////////
 
 			spheres->push_back(sphere);
 
-			//cout << "Sphere " << sphere.radius << " " << sphere.center[0] << " " << sphere.center[1] << " " << sphere.center[2] << " " << sphere.materialID << endl << endl;
+			cout << "Sphere " << sphere.radius << " " << sphere.center[0] << " " << sphere.center[1] << " " << sphere.center[2] << " " << sphere.materialID << endl << endl;
 		}
 
 		/////////////////////////////////////////////////////////////////////////////////
@@ -143,12 +174,13 @@ FileParser::parse(	const char *filename,		std::vector<PointLight> *lights,
 			Plane plane;			
 
 			//////////*********** START OF CODE TO CHANGE *******////////////
+			istringstream(line.substr(5)) >> plane.params[0] >> plane.params[1] >> plane.params[2] >> plane.params[3] >> plane.materialID;
 
 			//////////*********** END OF CODE TO CHANGE *******////////////
 
 			planes->push_back(plane);
 
-			//cout << "Plane " << plane.params[0] << " " << plane.params[1] << " " << plane.params[2] << " " << plane.params[3] << " " << plane.materialID << endl << endl;
+			cout << "Plane " << plane.params[0] << " " << plane.params[1] << " " << plane.params[2] << " " << plane.params[3] << " " << plane.materialID << endl << endl;
 		}
 
 		/////////////////////////////////////////////////////////////////////////////////
@@ -164,19 +196,37 @@ FileParser::parse(	const char *filename,		std::vector<PointLight> *lights,
 		/////////////////////////////////////////////////////////////////////////////////
 		// camera
 		else if(line.substr(0,6).compare("Camera") == 0) {
-			
-			//////////*********** START OF CODE TO CHANGE *******////////////
 
+			//////////*********** START OF CODE TO CHANGE *******////////////
 			// insert your code here and write result in variable camera!
+			// read next line - position
+			in.getline(currentLine,256);
+			istringstream(currentLine) >> camera->position[0] >> camera->position[1] >> camera->position[2];
+
+			// read next line - lookat point
+			in.getline(currentLine,256);
+			istringstream(currentLine) >> camera->center[0] >> camera->center[1] >> camera->center[2];
+
+			// read next line - up vector
+			in.getline(currentLine,256);
+			istringstream(currentLine) >> camera->up[0] >> camera->up[1] >> camera->up[2];
+
+			// read next line - field of view y, aspect
+			in.getline(currentLine,256);
+			istringstream(currentLine) >> camera->fovy >> camera->aspect;
+
+			// read next line - near and far clipping planes
+			in.getline(currentLine,256);
+			istringstream(currentLine) >> camera->zNear >> camera->zFar;
 
 			//////////*********** END OF CODE TO CHANGE *******////////////			
 
-			//cout << "Camera: " << endl;
-			//cout << camera->position[0] << ", " << camera->position[1] << ", " << camera->position[2]<< endl;
-			//cout << camera->center[0] << ", " << camera->center[1] << ", " << camera->center[2]<< endl;
-			//cout << camera->up[0] << ", " << camera->up[1] << ", " << camera->up[2]<< endl;
-			//cout << camera->fovy << ", " << camera->aspect << endl;
-			//cout << camera->zNear << ", " << camera->zFar << endl << endl;
+			cout << "Camera: " << endl;
+			cout << camera->position[0] << ", " << camera->position[1] << ", " << camera->position[2]<< endl;
+			cout << camera->center[0] << ", " << camera->center[1] << ", " << camera->center[2]<< endl;
+			cout << camera->up[0] << ", " << camera->up[1] << ", " << camera->up[2]<< endl;
+			cout << camera->fovy << ", " << camera->aspect << endl;
+			cout << camera->zNear << ", " << camera->zFar << endl << endl;
 
 		}
 
@@ -191,22 +241,23 @@ FileParser::parse(	const char *filename,		std::vector<PointLight> *lights,
 		else if (line.substr(0,10).compare("Resolution") == 0) {
 
 			//////////*********** START OF CODE TO CHANGE *******////////////
-
+			
 			// insert your code here and write result in resolution[0] and resolution[1]
+			istringstream(line.substr(10)) >> resolution[0] >> resolution[1];
 
 			//////////*********** END OF CODE TO CHANGE *******////////////	
-			
-			//cout << "Resolution : " << resolution[0] << "x" << resolution[1] << endl << endl;
+
+			cout << "Resolution : " << resolution[0] << "x" << resolution[1] << endl << endl;
 		}
 	}
 
 	in.close();
-	
+
 	// assign correct materials to primitives
 	foreach(sphere, (*spheres), vector<Sphere>) { 
 		foreach(material, materials, vector<Material>) {
 			if(material->id == sphere->materialID){
-					sphere->material = *material;
+				sphere->material = *material;
 			}
 		}
 	}
@@ -215,7 +266,7 @@ FileParser::parse(	const char *filename,		std::vector<PointLight> *lights,
 	foreach(plane, (*planes), vector<Plane>) { 
 		foreach(material, materials, vector<Material>) {
 			if(material->id == plane->materialID){
-					plane->material = *material;
+				plane->material = *material;
 			}
 		}
 	}
