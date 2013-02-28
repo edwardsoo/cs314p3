@@ -85,7 +85,7 @@ public:
 	// everything in between is blended by that
 	// factor with the surface color
 	double shadow;
-	// shadow [0...no reflection, 1...only reflection, 
+	// reflect [0...no reflection, 1...only reflection, 
 	// everything in between is blended by that
 	// factor with the surface color
 	double reflect;

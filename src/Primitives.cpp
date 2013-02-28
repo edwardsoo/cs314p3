@@ -51,6 +51,7 @@ Plane::intersect(Ray ray, double *depth,
 	if (t < 0 || t > 1)
 		return false;
 
+	*depth = t;
 	*posX = ray.origin[0] + t*ray.direction[0];
 	*posY = ray.origin[1] + t*ray.direction[1];
 	*posZ = ray.origin[2] + t*ray.direction[2];
@@ -127,6 +128,8 @@ Sphere::intersect(Ray ray, double *depth,
 		return false;
 
 	t = (t1 <= t2 && t1 >= 0) ? t1 : t2;
+	
+	*depth = t;
 	*posX = ray.origin[0] + t*ray.direction[0];
 	*posY = ray.origin[1] + t*ray.direction[1];
 	*posZ = ray.origin[2] + t*ray.direction[2];
