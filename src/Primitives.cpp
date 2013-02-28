@@ -109,7 +109,7 @@ Sphere::intersect(Ray ray, double *depth,
 	 * (ray_o_x + t*ray_d_x - sph_c_x)^2 + (ray_o_y + t*ray_d_y - sph_c_y)^2 + 
 	 * (ray_o_z + t*ray_d_z - sph_c_z)^2 = sph_rad^2
 	 */
-	double a,b,c,discrm, sqrt_discrm, t1, t2, t, center2intX, center2intY, center2intZ, center2intLen;
+	double a,b,c,discrm, sqrt_discrm, t1, t2, t;
 
 	a = pow(ray.direction[0],2) + pow(ray.direction[1],2) + pow(ray.direction[2],2);
 	b = (ray.origin[0]*ray.direction[0] + ray.origin[1]*ray.direction[1] + ray.origin[2]*ray.direction[2]
@@ -140,13 +140,11 @@ Sphere::intersect(Ray ray, double *depth,
 	*posZ = ray.origin[2] + t*ray.direction[2];
 
 	// Normal is <intersection-center> normalized
-	center2intX = *posX - center[0];
-	center2intY = *posY - center[1];
-	center2intZ = *posZ - center[2];
-	center2intLen = sqrt(pow(center2intX,2) + pow(center2intY,2) + pow(center2intZ,2));
-	*normalX = center2intX/center2intLen;
-	*normalY = center2intY/center2intLen;
-	*normalZ = center2intZ/center2intLen;
+	Vec3 center2intersect(*posX - center[0], *posY - center[1], *posZ - center[2]);
+	center2intersect.normalize();
+	*normalX = center2intersect.coord[0];
+	*normalY = center2intersect.coord[1];
+	*normalZ = center2intersect.coord[2];
 
 	//////////*********** END OF CODE TO CHANGE *******///k/////////
 
