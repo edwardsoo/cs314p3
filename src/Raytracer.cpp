@@ -281,10 +281,10 @@ Raytracer::shade(	double posX, double posY, double posZ,
 {
 
 	// calculate emissive part here
-	*red   = 1.0;
-	*green = 1.0;
-	*blue  = 1.0;
-
+	*red   =  1*normalX;
+	*green =  1*normalY;
+	*blue  =  1*normalZ;
+	
 	foreach(light, (*lights), vector<PointLight>) {
 
 		//////////*********** START OF CODE TO CHANGE *******////////////

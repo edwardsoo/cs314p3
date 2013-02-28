@@ -135,7 +135,7 @@ Sphere::intersect(Ray ray, double *depth,
 	center2intX = *posX - center[0];
 	center2intY = *posY - center[1];
 	center2intZ = *posZ - center[2];
-	center2intLen = sqrt(center2intX + center2intY + center2intZ);
+	center2intLen = sqrt(pow(center2intX,2) + pow(center2intY,2) + pow(center2intZ,2));
 	*normalX = center2intX/center2intLen;
 	*normalY = center2intY/center2intLen;
 	*normalZ = center2intZ/center2intLen;
