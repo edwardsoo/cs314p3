@@ -143,6 +143,16 @@ void
 
 /////////////////////////////////////////////////////////////////////////////////
 
+
+Vec3 getReflection(Vec3* normal, Vec3* incoming)
+{
+	double p2lDotNormal;
+	p2lDotNormal = normal->dot(*incoming);
+	return Vec3(2*p2lDotNormal*normal->coord[0] - incoming->coord[0],
+		2*p2lDotNormal*normal->coord[1] - incoming->coord[1],
+		2*p2lDotNormal*normal->coord[2] - incoming->coord[2]);
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 //	this function shoots a ray into the scene and calculates
 //	the closest point of intersection
@@ -234,6 +244,31 @@ void
 			(*currRayRecursion) += 1;
 
 			//////////*********** START OF CODE TO CHANGE *******////////////
+			double rRed, rGreen, rBlue, rDepth;
+			Vec3 intersectNormal(intersectNormal[0], intersectNormal[1], intersectNormal[2]);
+			intersectNormal.normalize();
+			Vec3 ray(pixelRay.direction[0], pixelRay.direction[1], pixelRay.direction[2]);
+			ray.normalize();
+			Vec3 reflection = getReflection(&intersectNormal, &ray);
+			reflection.normalize();
+
+			Vec3 rayDirection(reflection.coord[0], 
+				reflection.coord[1], 
+				reflection.coord[2]);
+			rayDirection.normalize();
+
+			Ray reflectionRay(intersectPos[0],
+				intersectPos[1],
+				intersectPos[2],
+				rayDirection[0],
+				rayDirection[1],
+				rayDirection[2]);
+
+			traceRay(reflectionRay, lights, planes, spheres, camera, currRayRecursion, 
+				&rRed ,&rGreen, &rBlue, &rDepth);
+			*red = intersectMaterial.reflect*rRed + (1-intersectMaterial.reflect)**red;
+			*green = intersectMaterial.reflect*rGreen + (1-intersectMaterial.reflect)**green;
+			*blue = intersectMaterial.reflect*rBlue + (1-intersectMaterial.reflect)**blue;
 
 			//////////*********** END OF CODE TO CHANGE *******////////////
 
@@ -253,31 +288,6 @@ void
 
 ///////////////////////////////////////////////////////////////////////////
 
-double getVectorLen(double x, double y, double z) 
-{
-	return sqrt(pow(x,2)+pow(y,2)+pow(z,2));
-}
-
-void getVector(double toX, double toY, double toZ, double fromX, double fromY, double fromZ, 
-			   double* x, double* y, double* z) 
-{
-	*x = toX - fromX;
-	*y = toY - fromY;
-	*z = toZ - fromZ;
-}
-
-double getDotProduct(double x1, double y1, double z1, double x2, double y2, double z2) {
-	return x1*x2 + y1*y2 + z1*z2;
-}
-
-Vec3 getReflection(Vec3* normal, Vec3* p2l)
-{
-	double p2lDotNormal;
-	p2lDotNormal = normal->dot(*p2l);
-	return Vec3(2*p2lDotNormal*normal->coord[0] - p2l->coord[0],
-		2*p2lDotNormal*normal->coord[1] - p2l->coord[1],
-		2*p2lDotNormal*normal->coord[2] - p2l->coord[2]);
-}
 
 /////////////////////////////////////////////////////////////////////////////////
 //	here you need to calculate the proper shading of a given point at posX, posY,

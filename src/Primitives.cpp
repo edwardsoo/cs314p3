@@ -43,9 +43,14 @@ Plane::intersect(Ray ray, double *depth,
 	 * A(ray_o_x + t*ray_d_x) + B(ray_o_y + t*ray_d_y) + 
 	 * C(ray_o_z + t*ray_d_z) + D = 0
 	 */
-	double t, abc_len, ray_dir_len, plane_nX, plane_nY, plane_nZ, ray_plane_n_angle, abc_dot_ray;
-	t = (params[0]*ray.origin[0] + params[1]*ray.origin[1] + params[2]*ray.origin[2] + params[3])
-		/ -(params[0]*ray.direction[0] + params[1]*ray.direction[1] + params[2]*ray.direction[2]);
+	Vec3 planeNormal(params[0], params[1], params[2]);
+	planeNormal.normalize();
+	Vec3 rayDirection(ray.direction[0], ray.direction[1], ray.direction[2]);
+	Vec3 rayOrigin(ray.origin[0], ray.origin[1], ray.origin[2]);
+
+	double t, planeNormalRayAngle, planeNormalDotRayDirection;
+	t = - (planeNormal.dot(rayOrigin) + params[3])
+		/ planeNormal.dot(rayDirection);
 
 	// No intersection or it is outside the view
 	if (t < 0 || t > 1)
@@ -57,15 +62,15 @@ Plane::intersect(Ray ray, double *depth,
 	*posZ = ray.origin[2] + t*ray.direction[2];
 
 	// Calculate angle between ray direction and plane normal
-	abc_len = sqrt(pow(params[0],2) + pow(params[1],2) + pow(params[2],2));
-	ray_dir_len = sqrt(pow(ray.origin[0],2) + pow(ray.origin[0],2) + pow(ray.origin[2],2));
-	abc_dot_ray =  params[0]*ray.origin[0] + params[1]*ray.origin[1] + params[2]*ray.origin[2];
-	ray_plane_n_angle = acos(abc_dot_ray/(abc_len*ray_dir_len));
+	planeNormal.normalize();
+	rayDirection.normalize();
+	planeNormalDotRayDirection = planeNormal.dot(rayDirection);
+	planeNormalRayAngle = acos(planeNormalDotRayDirection);
 
 	// Normal is the plane normal if angle > 90 degree
-	*normalX = (ray_plane_n_angle > PI/2) ? params[0]/abc_len : -params[0]/abc_len;
-	*normalY = (ray_plane_n_angle > PI/2) ? params[1]/abc_len : -params[1]/abc_len;
-	*normalZ = (ray_plane_n_angle > PI/2) ? params[2]/abc_len : -params[2]/abc_len;
+	*normalX = (planeNormalRayAngle > PI/2) ? params[0] : -params[0];
+	*normalY = (planeNormalRayAngle > PI/2) ? params[1] : -params[1];
+	*normalZ = (planeNormalRayAngle > PI/2) ? params[2] : -params[2];
 
 
 	//////////*********** END OF CODE TO CHANGE *******////////////
