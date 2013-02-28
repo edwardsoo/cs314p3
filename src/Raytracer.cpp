@@ -270,14 +270,13 @@ double getDotProduct(double x1, double y1, double z1, double x2, double y2, doub
 	return x1*x2 + y1*y2 + z1*z2;
 }
 
-void getReflection(double normalX, double normalY, double normalZ, double p2lX, double p2lY, double p2lZ, 
-				   double* reflectX, double* reflectY, double* reflectZ)
+Vec3 getReflection(Vec3* normal, Vec3* p2l)
 {
 	double p2lDotNormal;
-	p2lDotNormal = getDotProduct(normalX, normalY,normalZ, p2lX, p2lY, p2lZ);
-	*reflectX = 2*p2lDotNormal*normalX - p2lX;
-	*reflectY = 2*p2lDotNormal*normalY - p2lY;
-	*reflectZ = 2*p2lDotNormal*normalZ - p2lZ;
+	p2lDotNormal = normal->dot(*p2l);
+	return Vec3(2*p2lDotNormal*normal->coord[0] - p2l->coord[0],
+		2*p2lDotNormal*normal->coord[1] - p2l->coord[1],
+		2*p2lDotNormal*normal->coord[2] - p2l->coord[2]);
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -306,32 +305,33 @@ void
 	std::vector<Sphere>		*spheres,
 	double *red, double *green, double *blue)
 {
+	*red = 0;
+	*green = 0;
+	*blue = 0;
 	// debug normal
 	/**red = 1.0*normalX;
 	*green = 1.0*normalY;
 	*blue = 1.0*normalZ;
 	return;*/
 
-	double p2eX, p2eY, p2eZ, p2eLen, p2eNDotNormal;
-	double p2pX, p2pY, p2pZ;
+	double p2eDotNormal;
+	Vec3 p2e(camera->position[0]-posX, camera->position[1]-posY, camera->position[2]-posY);
+	p2e.normalize();
+	Vec3 normal(normalX, normalY, normalZ);
+
+	/*double p2pZ = p2eZ - camera->zNear;
+	double p2pX = p2eX*p2pZ/p2eZ;
+	double p2pY = p2eY*p2pZ/p2eZ;
+	Vec3 p2p(p2pX, p2pY, p2pZ);*/
 
 	// calculate emissive part here.
-	getVector(camera->position[0], camera->position[1], camera->position[2], posX, posY, posZ, &p2eX, &p2eY, &p2eZ);
-	p2eLen = getVectorLen(p2eX,p2eY,p2eZ);
 
-	// (normalized point-to-camera) dot (normal)
-	p2eNDotNormal = getDotProduct(p2eX/p2eLen, p2eY/p2eLen, p2eZ/p2eLen, normalX, normalY, normalZ);
-	if (p2eNDotNormal < 0)
-		p2eNDotNormal = 0;
-
-	*red = material.emission[0]*p2eNDotNormal;
-	*green = material.emission[1]*p2eNDotNormal;
-	*blue = material.emission[2]*p2eNDotNormal;
-
-	// Point-to-pixel distance
-	p2pZ = p2eZ - camera->zNear;
-	p2pX = p2eX*p2pZ/p2eZ;
-	p2pY = p2eY*p2pZ/p2eZ;
+	p2eDotNormal = p2e.dot(normal);
+	if (p2eDotNormal > 0) {
+		*red = material.emission[0]*p2eDotNormal;
+		*green = material.emission[1]*p2eDotNormal;
+		*blue = material.emission[2]*p2eDotNormal;
+	}
 
 	foreach(light, (*lights), vector<PointLight>) {
 
@@ -341,15 +341,15 @@ void
 		// make sure to add the light attenuation
 		// effect for the diffuse and specular term
 		double ambient[3], diffuse[3], specular[3];
-		double p2lX, p2lY, p2lZ, p2lLen, reflectX, reflectY, reflectZ, reflectLen, p2lDotNormal, p2eDotReflect, p2eDotReflectToShiny;
-		double hX, hY, hZ, hLen, hDotNormal, hDotNormalToShiny, l2pAttenuation;
+		double p2lDotNormal, p2eDotReflect, p2eDotReflectToShiny;
+		double hDotNormal, hDotNormalToShiny, l2pAttenuation;
+		bool inShadow = false;
 
 		// Calculate point-to-light, reflection vectors and attenuation factor
-		getVector(light->position[0], light->position[1], light->position[2], posX, posY, posZ, &p2lX, &p2lY, &p2lZ);
-		p2lLen = getVectorLen(p2lX, p2lY, p2lZ);
-		getReflection(normalX, normalY, normalZ, p2lX/p2lLen, p2lY/p2lLen, p2lZ/p2lLen, &reflectX, &reflectY, &reflectZ);
-		reflectLen = getVectorLen(reflectX, reflectY, reflectZ);
-		l2pAttenuation = 1/(light->attenuation[0]+light->attenuation[1]*p2lLen+light->attenuation[2]*pow(p2lLen,2));
+		Vec3 p2l(light->position[0]-posX, light->position[1]-posY, light->position[2]-posZ);
+		l2pAttenuation = 1/(light->attenuation[0]+light->attenuation[1]*p2l.length()+light->attenuation[2]*pow(p2l.length(),2));
+		p2l.normalize();
+		Vec3 reflect = getReflection(&normal, &p2l);
 
 		// Ambient
 		ambient[0] = light->ambient[0]*material.ambient[0];
@@ -357,7 +357,7 @@ void
 		ambient[2] = light->ambient[2]*material.ambient[2];
 
 		// Diffuse
-		p2lDotNormal = getDotProduct(p2lX/p2lLen, p2lY/p2lLen, p2lZ/p2lLen, normalX, normalY,normalZ);
+		p2lDotNormal = p2l.dot(normal);
 		if (p2lDotNormal > 0) {
 			diffuse[0] = light->diffuse[0]*material.diffuse[0]*p2lDotNormal*l2pAttenuation;
 			diffuse[1] = light->diffuse[1]*material.diffuse[1]*p2lDotNormal*l2pAttenuation;
@@ -368,8 +368,7 @@ void
 
 
 		// Specular
-		p2eDotReflect = getDotProduct(reflectX/reflectLen, reflectY/reflectLen, reflectZ/reflectLen, 
-			p2eX/p2eLen, p2eY/p2eLen, p2eZ/p2eLen);
+		p2eDotReflect = p2e.dot(reflect);
 		if (p2eDotReflect > 0) {
 			p2eDotReflectToShiny = pow(p2eDotReflect, material.shininess);
 			specular[0] = light->specular[0]*material.specular[0]*p2eDotReflectToShiny*l2pAttenuation;
@@ -379,22 +378,19 @@ void
 			specular[0] = specular[1] = specular[2] = 0;
 		}
 
-		*red += ambient[0] + diffuse[0] + specular[0];
-		*green += ambient[1] + diffuse[1] + specular[1];
-		*blue += ambient[2] + diffuse[2] + specular[2];
-
 		// Blinn-Phong Model
 		// Halfway vector h
-		/*hX = (p2lX + p2eX)/2;
-		hY = (p2lY + p2eY)/2;
-		hZ = (p2lZ + p2eZ)/2;
-		hLen = getVectorLen(hX, hY, hZ);
-		hDotNormal = getDotProduct(hX/hLen, hY/hLen, hZ/hLen, normalX, normalY, normalZ);
+		/*Vec3 h((p2l.coord[0] + p2e.coord[0])/2, (p2l.coord[1] + p2e.coord[1])/2, (p2l.coord[2] + p2e.coord[2])/2);
+		h.normalize();
+		hDotNormal = h.dot(normal);
 		if (hDotNormal > 0) {
-			hDotNormalToShiny = pow(hDotNormal, material.shininess);
+		hDotNormalToShiny = pow(hDotNormal, material.shininess);
+		specular[0] = light->specular[0]*material.specular[0]*hDotNormalToShiny*l2pAttenuation;
+		specular[1] = light->specular[1]*material.specular[1]*hDotNormalToShiny*l2pAttenuation;
+		specular[2] = light->specular[2]*material.specular[2]*hDotNormalToShiny*l2pAttenuation;
 		} else {
+		specular[0] = specular[1] = specular[2] = 0;
 		}*/
-
 
 
 		/////////////////////////////////////////////////////////////////////////////////////
@@ -407,7 +403,41 @@ void
 			//////////*********** START OF CODE TO CHANGE *******////////////
 
 			// add your code for shadows here
+			double iDepth, iPos[3], iNormal[3];
+			double t = 0.01;
 
+			Vec3 rayDirection(	light->position[0]-posX, 
+				light->position[1]-posY, 
+				light->position[2]-posZ);
+			rayDirection.normalize();
+
+			// Move vertex position in the direction of the normal a bit
+			Ray ray(posX+normalX*t, 
+				posY+normalY*t,
+				posZ+normalZ*t,
+				rayDirection[0],
+				rayDirection[1],
+				rayDirection[2]	);
+
+			foreach(p, (*planes), vector<Plane>) {
+				if( p->intersect(ray, &iDepth, 
+					&iPos[0], &iPos[1], &iPos[2],
+					&iNormal[0], &iNormal[1], &iNormal[2])) {
+						inShadow = true;
+						break;
+				}
+			}
+			if (!inShadow) {
+				foreach(s, (*spheres), vector<Sphere>) {
+					if( s->intersect(ray, &iDepth, 
+						&iPos[0], &iPos[1], &iPos[2],
+						&iNormal[0], &iNormal[1], &iNormal[2])) {
+							inShadow = true;
+							break;
+
+					}
+				}
+			}
 			//////////*********** END OF CODE TO CHANGE *******////////////
 		}
 
@@ -417,6 +447,12 @@ void
 		//////////*********** START OF CODE TO CHANGE *******////////////
 
 		// add calculated color to final color
+
+		*red += (ambient[0] + diffuse[0] + specular[0])*(inShadow ? 1-material.shadow : 1);
+		*green += (ambient[1] + diffuse[1] + specular[1])*(inShadow ? 1-material.shadow : 1);
+		*blue += (ambient[2] + diffuse[2] + specular[2])*(inShadow ? 1-material.shadow : 1);
+
+
 
 		//////////*********** END OF CODE TO CHANGE *******////////////
 	}	
