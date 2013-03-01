@@ -240,38 +240,38 @@ void
 
 		/////////////////////////////////////////////////////////////////////////////////////
 		// recurse for reflections
-		if( (*currRayRecursion<MAX_RAY_RECURSION) && (intersectMaterial.reflect>0.0) ) {				
-			(*currRayRecursion) += 1;
+		//if( (*currRayRecursion<MAX_RAY_RECURSION) && (intersectMaterial.reflect>0.0) ) {				
+		//	(*currRayRecursion) += 1;
 
-			//////////*********** START OF CODE TO CHANGE *******////////////
-			double rRed, rGreen, rBlue, rDepth;
-			rRed = rGreen = rBlue = 0;
-			rDepth = 1.0;
+		//	//////////*********** START OF CODE TO CHANGE *******////////////
+		//	double rRed, rGreen, rBlue, rDepth;
+		//	rRed = rGreen = rBlue = 0;
+		//	rDepth = 1.0;
 
-			Vec3 intersectNormal(intersectNormal[0], intersectNormal[1], intersectNormal[2]);
-			intersectNormal.normalize();
-			Vec3 ray(-pixelRay.direction[0], -pixelRay.direction[1], -pixelRay.direction[2]);
-			ray.normalize();
-			Vec3 reflection = getReflection(intersectNormal, ray);
-			reflection.normalize();
+		//	Vec3 intersectNormal(intersectNormal[0], intersectNormal[1], intersectNormal[2]);
+		//	intersectNormal.normalize();
+		//	Vec3 ray(-pixelRay.direction[0], -pixelRay.direction[1], -pixelRay.direction[2]);
+		//	ray.normalize();
+		//	Vec3 reflection = getReflection(intersectNormal, ray);
+		//	reflection.normalize();
 
-			Ray reflectionRay(intersectPos[0]+intersectNormal[0]*INTERSECT_CORRECTION_NORMAL_SCALAR,
-				intersectPos[1]+intersectNormal[1]*INTERSECT_CORRECTION_NORMAL_SCALAR,
-				intersectPos[2]+intersectNormal[2]*INTERSECT_CORRECTION_NORMAL_SCALAR,
-				reflection[0]*(camera->zFar-camera->zNear),
-				reflection[1]*(camera->zFar-camera->zNear),
-				reflection[2]*(camera->zFar-camera->zNear));
+		//	Ray reflectionRay(intersectPos[0]+intersectNormal[0]*INTERSECT_CORRECTION_NORMAL_SCALAR,
+		//		intersectPos[1]+intersectNormal[1]*INTERSECT_CORRECTION_NORMAL_SCALAR,
+		//		intersectPos[2]+intersectNormal[2]*INTERSECT_CORRECTION_NORMAL_SCALAR,
+		//		reflection[0]*(camera->zFar-camera->zNear),
+		//		reflection[1]*(camera->zFar-camera->zNear),
+		//		reflection[2]*(camera->zFar-camera->zNear));
 
-			traceRay(reflectionRay, lights, planes, spheres, camera, currRayRecursion, 
-				&rRed ,&rGreen, &rBlue, &rDepth);
+		//	traceRay(reflectionRay, lights, planes, spheres, camera, currRayRecursion, 
+		//		&rRed ,&rGreen, &rBlue, &rDepth);
 
-			*red = intersectMaterial.reflect*rRed + (1-intersectMaterial.reflect)**red;
-			*green = intersectMaterial.reflect*rGreen + (1-intersectMaterial.reflect)**green;
-			*blue = intersectMaterial.reflect*rBlue + (1-intersectMaterial.reflect)**blue;
+		//	*red = intersectMaterial.reflect*rRed + (1-intersectMaterial.reflect)**red;
+		//	*green = intersectMaterial.reflect*rGreen + (1-intersectMaterial.reflect)**green;
+		//	*blue = intersectMaterial.reflect*rBlue + (1-intersectMaterial.reflect)**blue;
 
-			//////////*********** END OF CODE TO CHANGE *******////////////
+		//	//////////*********** END OF CODE TO CHANGE *******////////////
 
-		}
+		//}
 		/////////////////////////////////////////////////////////////////////////////////////
 
 		// clip colors between 0.0 and 1.0
