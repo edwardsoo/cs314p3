@@ -321,8 +321,8 @@ void
 
 	double p2eDotNormal;
 	// Using the camera's origin to calculate specular is wrong...
-	// Vec3 p2e(-ray.direction[0], -ray.direction[1], -ray.direction[2]);
-	Vec3 p2e(camera->position[0] - posX, camera->position[1] - posY, camera->position[2] - posZ);
+	// Vec3 p2e(camera->position[0] - posX, camera->position[1] - posY, camera->position[2] - posZ);
+	Vec3 p2e(-ray.direction[0], -ray.direction[1], -ray.direction[2]);
 	p2e.normalize();
 	Vec3 normal(normalX, normalY, normalZ);
 
