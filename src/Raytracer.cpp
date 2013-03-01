@@ -258,9 +258,9 @@ void
 			Ray reflectionRay(intersectPos[0]+intersectNormal[0]*x,
 				intersectPos[1]+intersectNormal[1]*x,
 				intersectPos[2]+intersectNormal[2]*x,
-				reflection[0],
-				reflection[1],
-				reflection[2]);
+				reflection[0]*(camera->zFar-camera->zNear),
+				reflection[1]*(camera->zFar-camera->zNear),
+				reflection[2]*(camera->zFar-camera->zNear));
 
 			traceRay(reflectionRay, lights, planes, spheres, camera, currRayRecursion, 
 				&rRed ,&rGreen, &rBlue, &rDepth);
@@ -320,8 +320,8 @@ void
 	*blue = 0;
 
 	double p2eDotNormal;
-	//Vec3 p2e(-ray.direction[0], -ray.direction[1], -ray.direction[2]);
-	Vec3 p2e(camera->position[0] - posX, camera->position[1] - posY, camera->position[2] - posZ);
+	Vec3 p2e(-ray.direction[0], -ray.direction[1], -ray.direction[2]);
+	//Vec3 p2e(camera->position[0] - posX, camera->position[1] - posY, camera->position[2] - posZ);
 	p2e.normalize();
 	Vec3 normal(normalX, normalY, normalZ);
 
@@ -379,17 +379,17 @@ void
 
 		// Blinn-Phong Model
 		// Halfway vector h
-		/*Vec3 h((p2l[0] + p2e[0])/2, (p2l[1] + p2e[1])/2, (p2l[2] + p2e[2])/2);
+		Vec3 h((p2l[0] + p2e[0])/2, (p2l[1] + p2e[1])/2, (p2l[2] + p2e[2])/2);
 		h.normalize();
 		hDotNormal = h.dot(normal);
 		if (hDotNormal > 0) {
-		hDotNormalToShiny = pow(hDotNormal, material.shininess);
-		specular[0] = light->specular[0]*material.specular[0]*hDotNormalToShiny*l2pAttenuation;
-		specular[1] = light->specular[1]*material.specular[1]*hDotNormalToShiny*l2pAttenuation;
-		specular[2] = light->specular[2]*material.specular[2]*hDotNormalToShiny*l2pAttenuation;
+			hDotNormalToShiny = pow(hDotNormal, material.shininess);
+			specular[0] = light->specular[0]*material.specular[0]*hDotNormalToShiny*l2pAttenuation;
+			specular[1] = light->specular[1]*material.specular[1]*hDotNormalToShiny*l2pAttenuation;
+			specular[2] = light->specular[2]*material.specular[2]*hDotNormalToShiny*l2pAttenuation;
 		} else {
-		specular[0] = specular[1] = specular[2] = 0;
-		}*/
+			specular[0] = specular[1] = specular[2] = 0;
+		}
 
 
 		/////////////////////////////////////////////////////////////////////////////////////
@@ -408,7 +408,7 @@ void
 			Vec3 rayDirection(	light->position[0]-posX, 
 				light->position[1]-posY, 
 				light->position[2]-posZ);
-			rayDirection.normalize();
+			rayDirection;
 
 			// Move vertex position in the direction of the normal a bit
 			Ray ray(posX+normalX*t, 
