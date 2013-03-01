@@ -240,38 +240,38 @@ void
 
 		/////////////////////////////////////////////////////////////////////////////////////
 		// recurse for reflections
-		//if( (*currRayRecursion<MAX_RAY_RECURSION) && (intersectMaterial.reflect>0.0) ) {				
-		//	(*currRayRecursion) += 1;
+		if( (*currRayRecursion<MAX_RAY_RECURSION) && (intersectMaterial.reflect>0.0) ) {				
+			(*currRayRecursion) += 1;
 
-		//	//////////*********** START OF CODE TO CHANGE *******////////////
-		//	double rRed, rGreen, rBlue, rDepth;
-		//	rRed = rGreen = rBlue = 0.0;
-		//	rDepth = 1.0;
+			//////////*********** START OF CODE TO CHANGE *******////////////
+			double rRed, rGreen, rBlue, rDepth;
+			rRed = rGreen = rBlue = 0.0;
+			rDepth = 1.0;
 
-		//	Vec3 intersectNormal(intersectNormal[0], intersectNormal[1], intersectNormal[2]);
-		//	intersectNormal.normalize();
-		//	Vec3 ray(-pixelRay.direction[0], -pixelRay.direction[1], -pixelRay.direction[2]);
-		//	ray.normalize();
-		//	Vec3 reflection = getReflection(intersectNormal, ray);
-		//	reflection.normalize();
+			Vec3 intersectNormal(intersectNormal[0], intersectNormal[1], intersectNormal[2]);
+			intersectNormal.normalize();
+			Vec3 ray(-pixelRay.direction[0], -pixelRay.direction[1], -pixelRay.direction[2]);
+			ray.normalize();
+			Vec3 reflection = getReflection(intersectNormal, ray);
+			reflection.normalize();
 
-		//	Ray reflectionRay(intersectPos[0]+intersectNormal[0]*INTERSECT_CORRECTION_NORMAL_SCALAR,
-		//		intersectPos[1]+intersectNormal[1]*INTERSECT_CORRECTION_NORMAL_SCALAR,
-		//		intersectPos[2]+intersectNormal[2]*INTERSECT_CORRECTION_NORMAL_SCALAR,
-		//		reflection[0]*(camera->zFar-camera->zNear),
-		//		reflection[1]*(camera->zFar-camera->zNear),
-		//		reflection[2]*(camera->zFar-camera->zNear));
+			Ray reflectionRay(intersectPos[0],
+				intersectPos[1],
+				intersectPos[2],
+				reflection[0]*(camera->zFar-camera->zNear),
+				reflection[1]*(camera->zFar-camera->zNear),
+				reflection[2]*(camera->zFar-camera->zNear));
 
-		//	traceRay(reflectionRay, lights, planes, spheres, camera, currRayRecursion, 
-		//		&rRed ,&rGreen, &rBlue, &rDepth);
+			traceRay(reflectionRay, lights, planes, spheres, camera, currRayRecursion, 
+				&rRed ,&rGreen, &rBlue, &rDepth);
 
-		//	*red = intersectMaterial.reflect*rRed + (1-intersectMaterial.reflect)**red;
-		//	*green = intersectMaterial.reflect*rGreen + (1-intersectMaterial.reflect)**green;
-		//	*blue = intersectMaterial.reflect*rBlue + (1-intersectMaterial.reflect)**blue;
+			*red = intersectMaterial.reflect*rRed + (1-intersectMaterial.reflect)**red;
+			*green = intersectMaterial.reflect*rGreen + (1-intersectMaterial.reflect)**green;
+			*blue = intersectMaterial.reflect*rBlue + (1-intersectMaterial.reflect)**blue;
 
-		//	//////////*********** END OF CODE TO CHANGE *******////////////
+			//////////*********** END OF CODE TO CHANGE *******////////////
 
-		//}
+		}
 		/////////////////////////////////////////////////////////////////////////////////////
 
 		// clip colors between 0.0 and 1.0
@@ -367,7 +367,7 @@ void
 		}
 
 		// Specular
-		Vec3 reflect = getReflection(normal, p2l);
+		/*Vec3 reflect = getReflection(normal, p2l);
 		p2eDotReflect = p2e.dot(reflect);
 		if (p2eDotReflect > 0) {
 			p2eDotReflectToShiny = pow(p2eDotReflect, material.shininess);
@@ -376,11 +376,11 @@ void
 			specular[2] = light->specular[2]*material.specular[2]*p2eDotReflectToShiny*l2pAttenuation;
 		} else {
 			specular[0] = specular[1] = specular[2] = 0;
-		}
+		}*/
 
 		// Blinn-Phong Model
 		// Halfway vector h
-		/*Vec3 h((p2l[0] + p2e[0])/2, (p2l[1] + p2e[1])/2, (p2l[2] + p2e[2])/2);
+		Vec3 h((p2l[0] + p2e[0])/2, (p2l[1] + p2e[1])/2, (p2l[2] + p2e[2])/2);
 		h.normalize();
 		hDotNormal = h.dot(normal);
 		if (hDotNormal > 0) {
@@ -390,7 +390,7 @@ void
 			specular[2] = light->specular[2]*material.specular[2]*hDotNormalToShiny*l2pAttenuation;
 		} else {
 			specular[0] = specular[1] = specular[2] = 0;
-		}*/
+		}
 
 
 		/////////////////////////////////////////////////////////////////////////////////////
