@@ -20,6 +20,7 @@
 
 #include <iostream>
 using namespace std;
+#define INTERSECT_CORRECTION_NORMAL_SCALAR 0.0001
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -57,6 +58,8 @@ void
 	// step for each pixel
 	double stepx = 2*tan(deg2rad(camera->fovy)*camera->aspect/2.0)*f.length() / resolution[0];
 	double stepy = 2*tan(deg2rad(camera->fovy)/2.0)*f.length() / resolution[1];
+	double f2zNear = camera->zNear/f.length();
+	double f2zFar = camera->zFar/f.length();
 
 	for(int y=0; y<resolution[1]; y++ ) {
 		for(int x=0; x<resolution[0]; x++) {
@@ -81,26 +84,23 @@ void
 
 			int alpha = x-resolution[0]/2;
 			int beta  = y-resolution[1]/2;
-			Vec3 pixelLookAt(	camera->center[0] + alpha*stepx*right[0] + beta*stepy*up[0],
-				camera->center[1] + alpha*stepx*right[1] + beta*stepy*up[1],
-				camera->center[2] + alpha*stepx*right[2] + beta*stepy*up[2]);			
 
+			// Move from camera position to lookAt by zNear, then move along u and v by zNear/|f|
+			Vec3 pixelStart(camera->position[0] + (f[0] + alpha*stepx*right[0] + beta*stepy*up[0])*f2zNear,
+				camera->position[1] + (f[1] + alpha*stepx*right[1] + beta*stepy*up[1])*f2zNear,
+				camera->position[2] + (f[2] + alpha*stepx*right[2] + beta*stepy*up[2])*f2zNear);
 
-			Vec3 pixelStart(	camera->position[0] + alpha*stepx*right[0] + beta*stepy*up[0],
-				camera->position[1] + alpha*stepx*right[1] + beta*stepy*up[1],
-				camera->position[2] + alpha*stepx*right[2] + beta*stepy*up[2]);
+			// Move from camera position to lookAt by zFar, then move along u and v by zFar/|f|
+			Vec3 pixelLookAt(camera->position[0] + (f[0] + alpha*stepx*right[0] + beta*stepy*up[0])*f2zFar,
+				camera->position[1] + (f[1] + alpha*stepx*right[1] + beta*stepy*up[1])*f2zFar,
+				camera->position[2] + (f[2] + alpha*stepx*right[2] + beta*stepy*up[2])*f2zFar);
 
-			Vec3 rayDirection(	pixelLookAt[0]-pixelStart[0], 
-				pixelLookAt[1]-pixelStart[1], 
+			Ray pixelRay(pixelStart[0], 
+				pixelStart[1],
+				pixelStart[2],
+				pixelLookAt[0]-pixelStart[0],
+				pixelLookAt[1]-pixelStart[1],
 				pixelLookAt[2]-pixelStart[2]);
-			rayDirection.normalize();
-
-			Ray pixelRay(	pixelStart[0] + camera->zNear*rayDirection[0], 
-				pixelStart[1] + camera->zNear*rayDirection[1],
-				pixelStart[2] + camera->zNear*rayDirection[2],
-				(camera->zFar-camera->zNear)*rayDirection[0],
-				(camera->zFar-camera->zNear)*rayDirection[1],
-				(camera->zFar-camera->zNear)*rayDirection[2]	);
 
 			//////////*********** END OF CODE TO CHANGE *******////////////
 
@@ -246,6 +246,7 @@ void
 			//////////*********** START OF CODE TO CHANGE *******////////////
 			double rRed, rGreen, rBlue, rDepth;
 			rRed = rGreen = rBlue = 0;
+			rDepth = 1.0;
 
 			Vec3 intersectNormal(intersectNormal[0], intersectNormal[1], intersectNormal[2]);
 			intersectNormal.normalize();
@@ -254,10 +255,9 @@ void
 			Vec3 reflection = getReflection(intersectNormal, ray);
 			reflection.normalize();
 
-			double x = 0.001;
-			Ray reflectionRay(intersectPos[0]+intersectNormal[0]*x,
-				intersectPos[1]+intersectNormal[1]*x,
-				intersectPos[2]+intersectNormal[2]*x,
+			Ray reflectionRay(intersectPos[0]+intersectNormal[0]*INTERSECT_CORRECTION_NORMAL_SCALAR,
+				intersectPos[1]+intersectNormal[1]*INTERSECT_CORRECTION_NORMAL_SCALAR,
+				intersectPos[2]+intersectNormal[2]*INTERSECT_CORRECTION_NORMAL_SCALAR,
 				reflection[0]*(camera->zFar-camera->zNear),
 				reflection[1]*(camera->zFar-camera->zNear),
 				reflection[2]*(camera->zFar-camera->zNear));
@@ -320,8 +320,9 @@ void
 	*blue = 0;
 
 	double p2eDotNormal;
-	Vec3 p2e(-ray.direction[0], -ray.direction[1], -ray.direction[2]);
-	//Vec3 p2e(camera->position[0] - posX, camera->position[1] - posY, camera->position[2] - posZ);
+	// Using the camera's origin to calculate specular is wrong...
+	// Vec3 p2e(-ray.direction[0], -ray.direction[1], -ray.direction[2]);
+	Vec3 p2e(camera->position[0] - posX, camera->position[1] - posY, camera->position[2] - posZ);
 	p2e.normalize();
 	Vec3 normal(normalX, normalY, normalZ);
 
@@ -367,7 +368,7 @@ void
 		}
 
 		// Specular
-		p2eDotReflect = p2e.dot(reflect);
+		/*p2eDotReflect = p2e.dot(reflect);
 		if (p2eDotReflect > 0) {
 			p2eDotReflectToShiny = pow(p2eDotReflect, material.shininess);
 			specular[0] = light->specular[0]*material.specular[0]*p2eDotReflectToShiny*l2pAttenuation;
@@ -375,7 +376,7 @@ void
 			specular[2] = light->specular[2]*material.specular[2]*p2eDotReflectToShiny*l2pAttenuation;
 		} else {
 			specular[0] = specular[1] = specular[2] = 0;
-		}
+		}*/
 
 		// Blinn-Phong Model
 		// Halfway vector h
@@ -403,7 +404,6 @@ void
 
 			// add your code for shadows here
 			double iDepth, iPos[3], iNormal[3];
-			double t = 0.01;
 
 			Vec3 rayDirection(	light->position[0]-posX, 
 				light->position[1]-posY, 
@@ -411,9 +411,9 @@ void
 			rayDirection;
 
 			// Move vertex position in the direction of the normal a bit
-			Ray ray(posX+normalX*t, 
-				posY+normalY*t,
-				posZ+normalZ*t,
+			Ray ray(posX+normalX*INTERSECT_CORRECTION_NORMAL_SCALAR, 
+				posY+normalY*INTERSECT_CORRECTION_NORMAL_SCALAR,
+				posZ+normalZ*INTERSECT_CORRECTION_NORMAL_SCALAR,
 				rayDirection[0],
 				rayDirection[1],
 				rayDirection[2]	);
