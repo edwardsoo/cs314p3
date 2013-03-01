@@ -245,7 +245,7 @@ void
 
 		//	//////////*********** START OF CODE TO CHANGE *******////////////
 		//	double rRed, rGreen, rBlue, rDepth;
-		//	rRed = rGreen = rBlue = 0;
+		//	rRed = rGreen = rBlue = 0.0;
 		//	rDepth = 1.0;
 
 		//	Vec3 intersectNormal(intersectNormal[0], intersectNormal[1], intersectNormal[2]);
@@ -350,7 +350,6 @@ void
 		Vec3 p2l(light->position[0]-posX, light->position[1]-posY, light->position[2]-posZ);
 		l2pAttenuation = 1/(light->attenuation[0]+light->attenuation[1]*p2l.length()+light->attenuation[2]*pow(p2l.length(),2));
 		p2l.normalize();
-		Vec3 reflect = getReflection(normal, p2l);
 
 		// Ambient
 		ambient[0] = light->ambient[0]*material.ambient[0];
@@ -368,7 +367,8 @@ void
 		}
 
 		// Specular
-		/*p2eDotReflect = p2e.dot(reflect);
+		Vec3 reflect = getReflection(normal, p2l);
+		p2eDotReflect = p2e.dot(reflect);
 		if (p2eDotReflect > 0) {
 			p2eDotReflectToShiny = pow(p2eDotReflect, material.shininess);
 			specular[0] = light->specular[0]*material.specular[0]*p2eDotReflectToShiny*l2pAttenuation;
@@ -376,11 +376,11 @@ void
 			specular[2] = light->specular[2]*material.specular[2]*p2eDotReflectToShiny*l2pAttenuation;
 		} else {
 			specular[0] = specular[1] = specular[2] = 0;
-		}*/
+		}
 
 		// Blinn-Phong Model
 		// Halfway vector h
-		Vec3 h((p2l[0] + p2e[0])/2, (p2l[1] + p2e[1])/2, (p2l[2] + p2e[2])/2);
+		/*Vec3 h((p2l[0] + p2e[0])/2, (p2l[1] + p2e[1])/2, (p2l[2] + p2e[2])/2);
 		h.normalize();
 		hDotNormal = h.dot(normal);
 		if (hDotNormal > 0) {
@@ -390,7 +390,7 @@ void
 			specular[2] = light->specular[2]*material.specular[2]*hDotNormalToShiny*l2pAttenuation;
 		} else {
 			specular[0] = specular[1] = specular[2] = 0;
-		}
+		}*/
 
 
 		/////////////////////////////////////////////////////////////////////////////////////
