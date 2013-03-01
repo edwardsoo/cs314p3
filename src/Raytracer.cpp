@@ -366,7 +366,7 @@ void
 		}
 
 		// Specular
-		Vec3 reflect = getReflection(normal, p2l);
+		/*Vec3 reflect = getReflection(normal, p2l);
 		p2eDotReflect = p2e.dot(reflect);
 		if (p2eDotReflect > 0) {
 			p2eDotReflectToShiny = pow(p2eDotReflect, material.shininess);
@@ -375,11 +375,11 @@ void
 			specular[2] = light->specular[2]*material.specular[2]*p2eDotReflectToShiny*l2pAttenuation;
 		} else {
 			specular[0] = specular[1] = specular[2] = 0;
-		}
+		}*/
 
 		// Blinn-Phong Model
 		// Halfway vector h
-		/*Vec3 h((p2l[0] + p2e[0])/2, (p2l[1] + p2e[1])/2, (p2l[2] + p2e[2])/2);
+		Vec3 h((p2l[0] + p2e[0])/2, (p2l[1] + p2e[1])/2, (p2l[2] + p2e[2])/2);
 		h.normalize();
 		hDotNormal = h.dot(normal);
 		if (hDotNormal > 0) {
@@ -389,7 +389,7 @@ void
 			specular[2] = light->specular[2]*material.specular[2]*hDotNormalToShiny*l2pAttenuation;
 		} else {
 			specular[0] = specular[1] = specular[2] = 0;
-		}*/
+		}
 
 
 		/////////////////////////////////////////////////////////////////////////////////////
