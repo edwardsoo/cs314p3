@@ -20,7 +20,7 @@
 
 #include <iostream>
 using namespace std;
-double INTERSECT_CORRECTION_NORMAL_SCALAR = 0.01;
+double INTERSECT_CORRECTION_NORMAL_SCALAR = 0.0001;
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -248,14 +248,15 @@ void
 			rRed = rGreen = rBlue = 0.0;
 			rDepth = 1.0;
 
-			Vec3 intersectNormal(intersectNormal[0], intersectNormal[1], intersectNormal[2]);
+			Vec3 normal(intersectNormal[0], intersectNormal[1], intersectNormal[2]);
+			normal.normalize();
 			Vec3 ray(-pixelRay.direction[0], -pixelRay.direction[1], -pixelRay.direction[2]);
 			ray.normalize();
-			Vec3 reflection = getReflection(intersectNormal, ray);
+			Vec3 reflection = getReflection(normal, ray);
 
-			Ray reflectionRay(intersectPos[0]+intersectNormal[0]*INTERSECT_CORRECTION_NORMAL_SCALAR,
-				intersectPos[1]+intersectNormal[1]*INTERSECT_CORRECTION_NORMAL_SCALAR,
-				intersectPos[2]+intersectNormal[2]*INTERSECT_CORRECTION_NORMAL_SCALAR,
+			Ray reflectionRay(intersectPos[0]+normal[0]*INTERSECT_CORRECTION_NORMAL_SCALAR,
+				intersectPos[1]+normal[1]*INTERSECT_CORRECTION_NORMAL_SCALAR,
+				intersectPos[2]+normal[2]*INTERSECT_CORRECTION_NORMAL_SCALAR,
 				reflection[0]*(camera->zFar-camera->zNear),
 				reflection[1]*(camera->zFar-camera->zNear),
 				reflection[2]*(camera->zFar-camera->zNear));
