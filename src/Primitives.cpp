@@ -32,17 +32,17 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 bool 
-Plane::intersect(Ray ray, double *depth,
-				 double *posX, double *posY, double *posZ,
-				 double *normalX, double *normalY, double *normalZ)
+	Plane::intersect(Ray ray, double *depth,
+	double *posX, double *posY, double *posZ,
+	double *normalX, double *normalY, double *normalZ)
 
 {
 	//////////*********** START OF CODE TO CHANGE *******////////////
 	/* 
-	 * Ray-plane intersection implicit equation:
-	 * A(ray_o_x + t*ray_d_x) + B(ray_o_y + t*ray_d_y) + 
-	 * C(ray_o_z + t*ray_d_z) + D = 0
-	 */
+	* Ray-plane intersection implicit equation:
+	* A(ray_o_x + t*ray_d_x) + B(ray_o_y + t*ray_d_y) + 
+	* C(ray_o_z + t*ray_d_z) + D = 0
+	*/
 	Vec3 planeNormal(params[0], params[1], params[2]);
 	planeNormal.normalize();
 	Vec3 rayDirection(ray.direction[0], ray.direction[1], ray.direction[2]);
@@ -53,7 +53,7 @@ Plane::intersect(Ray ray, double *depth,
 		/ planeNormal.dot(rayDirection);
 
 	// No intersection or it is outside the view
-	if (t < 0 || t > 1)
+	if (t != t || !(t >= 0 && t <= 1))
 		return false;
 
 	*depth = t;
@@ -97,22 +97,22 @@ Plane::intersect(Ray ray, double *depth,
 //
 /////////////////////////////////////////////////////////////////////////////////
 bool 
-Sphere::intersect(Ray ray, double *depth,	
-				  double *posX, double *posY, double *posZ,
-				  double *normalX, double *normalY, double *normalZ)
+	Sphere::intersect(Ray ray, double *depth,	
+	double *posX, double *posY, double *posZ,
+	double *normalX, double *normalY, double *normalZ)
 
 {
 	//////////*********** START OF CODE TO CHANGE *******////////////
 	/* 
-	 * Ray-sphere intersection implicit equation:
-	 * (ray_o_x + t*ray_d_x - sph_c_x)^2 + (ray_o_y + t*ray_d_y - sph_c_y)^2 + 
-	 * (ray_o_z + t*ray_d_z - sph_c_z)^2 = sph_rad^2
-	 */
+	* Ray-sphere intersection implicit equation:
+	* (ray_o_x + t*ray_d_x - sph_c_x)^2 + (ray_o_y + t*ray_d_y - sph_c_y)^2 + 
+	* (ray_o_z + t*ray_d_z - sph_c_z)^2 = sph_rad^2
+	*/
 	double a,b,c,discrm, sqrt_discrm, t1, t2, t;
 
 	a = pow(ray.direction[0],2) + pow(ray.direction[1],2) + pow(ray.direction[2],2);
 	b = (ray.origin[0]*ray.direction[0] + ray.origin[1]*ray.direction[1] + ray.origin[2]*ray.direction[2]
-		- ray.direction[0]*center[0] - ray.direction[1]*center[1] - ray.direction[2]*center[2]) * 2;
+	- ray.direction[0]*center[0] - ray.direction[1]*center[1] - ray.direction[2]*center[2]) * 2;
 	c = pow(ray.origin[0],2) + pow(ray.origin[1],2) + pow(ray.origin[2],2)
 		- (ray.origin[0]*center[0] + ray.origin[1]*center[1] + ray.origin[2]*center[2]) * 2
 		+ pow(center[0],2) + pow(center[1],2) + pow(center[2],2) - pow(radius,2);
@@ -126,13 +126,14 @@ Sphere::intersect(Ray ray, double *depth,
 	sqrt_discrm = sqrt(discrm);
 	t1 = (-b + sqrt_discrm)/(2*a);
 	t2 = (-b - sqrt_discrm)/(2*a);
-	
+
 	// Intersections lie outside viewing frustum
-	if ((t1 < 0 || t1 >1) && (t2 < 0 || t2 > 1))
+	if ((t1 != t1 || !(t1 >= 0 && t1 <= 1)) &&
+		(t2 != t2 || !(t2 >= 0 && t2 <= 1)))
 		return false;
 
 	t = (t1 <= t2 && t1 >= 0) ? t1 : t2;
-	
+
 	*depth = t;
 	*posX = ray.origin[0] + t*ray.direction[0];
 	*posY = ray.origin[1] + t*ray.direction[1];

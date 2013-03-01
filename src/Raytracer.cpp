@@ -20,7 +20,7 @@
 
 #include <iostream>
 using namespace std;
-#define INTERSECT_CORRECTION_NORMAL_SCALAR 0.0001
+double INTERSECT_CORRECTION_NORMAL_SCALAR = 0.0001;
 
 ///////////////////////////////////////////////////////////////////////////
 
