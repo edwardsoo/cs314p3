@@ -55,7 +55,7 @@ private:
 	// compute the shading at a given point and normal
 	// you also need the light sources and the other objects for
 	// shadows and reflections 
-	void	shade(	double posX, double posY, double posZ,
+	void	shade(	Ray ray, double posX, double posY, double posZ,
 					double normalX, double normalY, double normalZ,
 					Material material, Camera *camera, 
 					std::vector<PointLight> *lights, 

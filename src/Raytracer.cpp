@@ -144,13 +144,13 @@ void
 /////////////////////////////////////////////////////////////////////////////////
 
 
-Vec3 getReflection(Vec3* normal, Vec3* incoming)
+Vec3 getReflection(Vec3 normal, Vec3 incoming)
 {
 	double p2lDotNormal;
-	p2lDotNormal = normal->dot(*incoming);
-	return Vec3(2*p2lDotNormal*normal->coord[0] - incoming->coord[0],
-		2*p2lDotNormal*normal->coord[1] - incoming->coord[1],
-		2*p2lDotNormal*normal->coord[2] - incoming->coord[2]);
+	p2lDotNormal = normal.dot(incoming);
+	return Vec3(2*p2lDotNormal*normal[0] - incoming[0],
+		2*p2lDotNormal*normal[1] - incoming[1],
+		2*p2lDotNormal*normal[2] - incoming[2]);
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -232,7 +232,7 @@ void
 
 		*depth = intersectDepth;
 
-		shade(	intersectPos[0], intersectPos[1], intersectPos[2],
+		shade(pixelRay,	intersectPos[0], intersectPos[1], intersectPos[2],
 			intersectNormal[0], intersectNormal[1], intersectNormal[2],
 			intersectMaterial, camera, 
 			lights, planes,	spheres,
@@ -245,27 +245,26 @@ void
 
 			//////////*********** START OF CODE TO CHANGE *******////////////
 			double rRed, rGreen, rBlue, rDepth;
+			rRed = rGreen = rBlue = 0;
+
 			Vec3 intersectNormal(intersectNormal[0], intersectNormal[1], intersectNormal[2]);
 			intersectNormal.normalize();
-			Vec3 ray(pixelRay.direction[0], pixelRay.direction[1], pixelRay.direction[2]);
+			Vec3 ray(-pixelRay.direction[0], -pixelRay.direction[1], -pixelRay.direction[2]);
 			ray.normalize();
-			Vec3 reflection = getReflection(&intersectNormal, &ray);
+			Vec3 reflection = getReflection(intersectNormal, ray);
 			reflection.normalize();
 
-			Vec3 rayDirection(reflection.coord[0], 
-				reflection.coord[1], 
-				reflection.coord[2]);
-			rayDirection.normalize();
-
-			Ray reflectionRay(intersectPos[0],
-				intersectPos[1],
-				intersectPos[2],
-				rayDirection[0],
-				rayDirection[1],
-				rayDirection[2]);
+			double x = 0.001;
+			Ray reflectionRay(intersectPos[0]+intersectNormal[0]*x,
+				intersectPos[1]+intersectNormal[1]*x,
+				intersectPos[2]+intersectNormal[2]*x,
+				reflection[0],
+				reflection[1],
+				reflection[2]);
 
 			traceRay(reflectionRay, lights, planes, spheres, camera, currRayRecursion, 
 				&rRed ,&rGreen, &rBlue, &rDepth);
+
 			*red = intersectMaterial.reflect*rRed + (1-intersectMaterial.reflect)**red;
 			*green = intersectMaterial.reflect*rGreen + (1-intersectMaterial.reflect)**green;
 			*blue = intersectMaterial.reflect*rBlue + (1-intersectMaterial.reflect)**blue;
@@ -307,7 +306,8 @@ void
 //	bu 1-material.shadow
 /////////////////////////////////////////////////////////////////////////////////
 void	
-	Raytracer::shade(	double posX, double posY, double posZ,
+	Raytracer::shade(Ray ray,
+	double posX, double posY, double posZ,
 	double normalX, double normalY, double normalZ,
 	Material material, Camera *camera, 
 	std::vector<PointLight> *lights, 
@@ -318,24 +318,14 @@ void
 	*red = 0;
 	*green = 0;
 	*blue = 0;
-	// debug normal
-	/**red = 1.0*normalX;
-	*green = 1.0*normalY;
-	*blue = 1.0*normalZ;
-	return;*/
 
 	double p2eDotNormal;
-	Vec3 p2e(camera->position[0]-posX, camera->position[1]-posY, camera->position[2]-posY);
+	//Vec3 p2e(-ray.direction[0], -ray.direction[1], -ray.direction[2]);
+	Vec3 p2e(camera->position[0] - posX, camera->position[1] - posY, camera->position[2] - posZ);
 	p2e.normalize();
 	Vec3 normal(normalX, normalY, normalZ);
 
-	/*double p2pZ = p2eZ - camera->zNear;
-	double p2pX = p2eX*p2pZ/p2eZ;
-	double p2pY = p2eY*p2pZ/p2eZ;
-	Vec3 p2p(p2pX, p2pY, p2pZ);*/
-
 	// calculate emissive part here.
-
 	p2eDotNormal = p2e.dot(normal);
 	if (p2eDotNormal > 0) {
 		*red = material.emission[0]*p2eDotNormal;
@@ -359,7 +349,7 @@ void
 		Vec3 p2l(light->position[0]-posX, light->position[1]-posY, light->position[2]-posZ);
 		l2pAttenuation = 1/(light->attenuation[0]+light->attenuation[1]*p2l.length()+light->attenuation[2]*pow(p2l.length(),2));
 		p2l.normalize();
-		Vec3 reflect = getReflection(&normal, &p2l);
+		Vec3 reflect = getReflection(normal, p2l);
 
 		// Ambient
 		ambient[0] = light->ambient[0]*material.ambient[0];
@@ -376,7 +366,6 @@ void
 			diffuse[0] = diffuse[1] = diffuse[2] = 0;
 		}
 
-
 		// Specular
 		p2eDotReflect = p2e.dot(reflect);
 		if (p2eDotReflect > 0) {
@@ -390,7 +379,7 @@ void
 
 		// Blinn-Phong Model
 		// Halfway vector h
-		/*Vec3 h((p2l.coord[0] + p2e.coord[0])/2, (p2l.coord[1] + p2e.coord[1])/2, (p2l.coord[2] + p2e.coord[2])/2);
+		/*Vec3 h((p2l[0] + p2e[0])/2, (p2l[1] + p2e[1])/2, (p2l[2] + p2e[2])/2);
 		h.normalize();
 		hDotNormal = h.dot(normal);
 		if (hDotNormal > 0) {
@@ -462,7 +451,9 @@ void
 		*green += (ambient[1] + diffuse[1] + specular[1])*(inShadow ? 1-material.shadow : 1);
 		*blue += (ambient[2] + diffuse[2] + specular[2])*(inShadow ? 1-material.shadow : 1);
 
-
+		/**red = normalX*1.0;
+		*green = normalY*1.0;
+		*blue = normalZ*1.0;*/
 
 		//////////*********** END OF CODE TO CHANGE *******////////////
 	}	

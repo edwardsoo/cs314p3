@@ -68,10 +68,9 @@ Plane::intersect(Ray ray, double *depth,
 	planeNormalRayAngle = acos(planeNormalDotRayDirection);
 
 	// Normal is the plane normal if angle > 90 degree
-	*normalX = (planeNormalRayAngle > PI/2) ? params[0] : -params[0];
-	*normalY = (planeNormalRayAngle > PI/2) ? params[1] : -params[1];
-	*normalZ = (planeNormalRayAngle > PI/2) ? params[2] : -params[2];
-
+	*normalX = (planeNormalRayAngle > PI/2) ? planeNormal[0] : -planeNormal[0];
+	*normalY = (planeNormalRayAngle > PI/2) ? planeNormal[1] : -planeNormal[1];
+	*normalZ = (planeNormalRayAngle > PI/2) ? planeNormal[2] : -planeNormal[2];
 
 	//////////*********** END OF CODE TO CHANGE *******////////////
 
@@ -142,9 +141,9 @@ Sphere::intersect(Ray ray, double *depth,
 	// Normal is <intersection-center> normalized
 	Vec3 center2intersect(*posX - center[0], *posY - center[1], *posZ - center[2]);
 	center2intersect.normalize();
-	*normalX = center2intersect.coord[0];
-	*normalY = center2intersect.coord[1];
-	*normalZ = center2intersect.coord[2];
+	*normalX = center2intersect[0];
+	*normalY = center2intersect[1];
+	*normalZ = center2intersect[2];
 
 	//////////*********** END OF CODE TO CHANGE *******///k/////////
 
